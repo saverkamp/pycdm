@@ -74,8 +74,8 @@ class SinglePageItem(Item, Singlepage):
         self.label = info['title']
         self.file = info['find']
         self.parentnode = None
-        refURLparts = [base, alias, self.id]
-        self.refURL = '/'.join(refURLparts)
+        refurlparts = [base, alias, self.id]
+        self.refurl = '/'.join(refURLparts)
         fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
         self.fileurl = '/'.join(fileURLparts)
         self.imageurl = self.getimageurl()
@@ -93,8 +93,8 @@ class Document(Item):
         self.alias = alias
         self.id = id
         self.info = info
-        refURLparts = [base, alias, self.id]
-        self.refURL = '/'.join(refURLparts)
+        refurlparts = [base, alias, self.id]
+        self.refurl = '/'.join(refURLparts)
         self.structure = []
         for o in objinfo['page']:
             page = Page(o, alias, self.id, self.info['title'], pageinfo)
@@ -112,8 +112,8 @@ class Monograph(Item):
         self.id = id
         self.info = info
         self.structure = []
-        refURLparts = [base, alias, self.id]
-        self.refURL = '/'.join(refURLparts)
+        refurlparts = [base, alias, self.id]
+        self.refurl = '/'.join(refURLparts)
         for key, value in objinfo.items():
             if key == 'node':
                 subitem = Node(collections.OrderedDict(value), alias, self.id, pageinfo)
@@ -179,8 +179,8 @@ class Page(Subitem, Singlepage):
         self.file = objinfo['pagefile']
         self.parentnode = parentnode
         self.parent = parent
-        refURLparts = [base, alias, self.id]
-        self.refURL = '/'.join(refURLparts)
+        refurlparts = [base, alias, self.id]
+        self.refurl = '/'.join(refURLparts)
         call = Api()
         fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
         self.fileurl = call.getfileurl(self.alias, self.id, self.file)
