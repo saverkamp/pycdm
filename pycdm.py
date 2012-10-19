@@ -46,17 +46,16 @@ class Singlepage:
     """Abstract superclass for single page objects."""
     def __init__(self):
         pass
-
-    def getfileurl(self):
-        self.base = base
-        urlparts = [self.base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
-        url = '/'.join(urlparts)
-        return url
     
     def getimageurl(self, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text', degrees='degrees'):
         url = (base + '/utils/ajaxhelper/?CISOROOT=' + self.alias + '&CISOPTR=' + self.id + '&action=' + action + '&DMSCALE=' +
         scale + '&DMWIDTH=' + width + '&DMHEIGHT=' + height + '&DMX=' + x + '&DMY=' + y + '&DMTEXT=' + text + '&DMROTATE=' + degrees)
+        self.imageurl = url
         return url
+
+    def defaultimageurl(self):
+        call = Api()
+        self.imageurl = call.getimageurl(self.alias, self.id)
 
 
 # abstract class Subitem
@@ -77,6 +76,9 @@ class SinglePageItem(Item, Singlepage):
         self.parentnode = None
         refURLparts = [base, alias, self.id]
         self.refURL = '/'.join(refURLparts)
+        fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
+        self.fileurl = '/'.join(fileURLparts)
+        self.imageurl = self.getimageurl()
     def pages(self):
         pages = []
         pages.append(self)
@@ -170,7 +172,7 @@ class Node(Subitem):
 
 class Page(Subitem, Singlepage):
     """Subitem, Singlepage subclass for consitutent Pages of compound objects."""
-    def __init__(self, objinfo, alias, parent, parentnode, pageinfo='off'):
+    def __init__(self, objinfo, alias, parent, parentnode, base=base, pageinfo='off'):
         self.alias = alias
         self.id = objinfo['pageptr']
         self.label = objinfo['pagetitle']
@@ -179,6 +181,10 @@ class Page(Subitem, Singlepage):
         self.parent = parent
         refURLparts = [base, alias, self.id]
         self.refURL = '/'.join(refURLparts)
+        call = Api()
+        fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
+        self.fileurl = call.getfileurl(self.alias, self.id, self.file)
+        self.imageurl = call.getimageurl(self.alias, self.id)
         if (pageinfo == 'on'):
             self.pageinfo()
     def pageinfo(self):
@@ -243,7 +249,7 @@ class Api:
                 items.append(r['pointer'])
             return items
     
-    def getfile(self, alias, id, filename):
+    def getfileurl(self, alias, id, filename):
         """Calls GetFile and returns a URL for retrieving the file.""
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2ai.asp"""
@@ -252,7 +258,7 @@ class Api:
         url = '/'.join(urlparts)
         return url
     
-    def getimage(self, alias, id, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text',
+    def getimageurl(self, alias, id, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text',
      degrees='degrees'):
         """Calls GetImage and returns a URL for downloading a JPEG of the file.
 
