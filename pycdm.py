@@ -2,11 +2,11 @@
 
 import urllib2
 import json
-import time
-import collections
+import collections as colls
 
 base = 'http://digital.lib.uiowa.edu'
 port = ':81'
+collections = {}
 
 
 def item(alias, id, pageinfo='off'):
@@ -15,6 +15,8 @@ def item(alias, id, pageinfo='off'):
     info = call.iteminfo(alias, id)
     objinfo = call.objectinfo(alias, id)
     parent = call.parent(alias, id)
+    if alias not in collections:
+        collections[alias] = Collection(alias)
     if ('code' in objinfo):
         if (str(parent) != '-1'):
             raise RuntimeError('ID entered is not an item')
@@ -105,6 +107,10 @@ class SinglePageItem(Item, Singlepage):
     def __init__(self, alias, id, info, pageinfo):
         self.alias = alias
         self.id = id
+        if alias in collections:
+            self.collection = collections[alias]
+        else:
+            collections[alias] = Collection(alias)
         self.info = info
         self.label = info['title']
         self.file = info['find']
@@ -128,6 +134,10 @@ class Document(Item):
         self.alias = alias
         self.id = id
         self.info = info
+        if alias in collections:
+            self.collection = collections[alias]
+        else:
+            collections[alias] = Collection(alias)
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
         self.structure = []
@@ -145,13 +155,17 @@ class Monograph(Item):
     def __init__(self, alias, id, info, objinfo, pageinfo):
         self.alias = alias
         self.id = id
+        if alias in collections:
+            self.collection = collections[alias]
+        else:
+            collections[alias] = Collection(alias)
         self.info = info
         self.structure = []
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
         for key, value in objinfo.items():
             if key == 'node':
-                subitem = Node(collections.OrderedDict(value), alias, self.id, pageinfo)
+                subitem = Node(colls.OrderedDict(value), alias, self.id, pageinfo)
                 self.structure.append(subitem)
             elif key == 'page':
                 subitem = Page(value, alias, self.id, pageinfo)
@@ -286,7 +300,7 @@ class Api:
         urlparts = [self.base, 'dmwebservices/index.php?q=dmGetCompoundObjectInfo', alias, id, format]
         url = '/'.join(urlparts)
         compoundinfo = urllib2.urlopen(url).read()
-        return json.loads(compoundinfo, object_pairs_hook=collections.OrderedDict)
+        return json.loads(compoundinfo, object_pairs_hook=colls.OrderedDict)
 
     def parent(self, alias, id, format='json'):
         """Calls GetParent and returns CDM item id of parent or '-1' if no parent.
