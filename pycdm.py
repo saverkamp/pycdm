@@ -29,6 +29,41 @@ def cdm(alias, id, pageinfo='off'):
             raise RuntimeError('error')
 
 
+class Collection:
+    """A CONTENTdm collection"""
+    def __init__(self, alias):
+        call = Api()
+        params = call.collectionparameters(alias)
+        fields = call.collectionfieldinfo(alias)
+        self.name = params['name']
+        self.alias = alias
+        # fields are structured as a dictionary of objects with nickname as key (nick:Field)
+        self.fields = {}
+        for f in fields:
+            field = Field(alias, f)
+            self.fields[field.nick] = field
+        self.dcmap = {}
+        # map field nicknames to dc nicknames, None if no map
+        for key, value in self.fields.items():
+            if value.dc == 'BLANK':
+                self.dcmap[key] = None
+            else:
+                self.dcmap[key] = value.dc
+
+
+class Field:
+    """A Collection field"""
+    def __init__(self, alias, fieldinfo):
+        self.alias = alias
+        self.name = fieldinfo['name']
+        self.nick = fieldinfo['nick']
+        self.dc = fieldinfo['dc']
+        self.req = fieldinfo['req']
+        self.vocab = fieldinfo['vocab']
+        self.hide = fieldinfo['hide']
+        self.search = fieldinfo['search']
+
+
 class Item:
     """Abstract superclass for items"""
     def __init__(self, alias, id, info):
