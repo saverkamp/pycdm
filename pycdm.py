@@ -9,7 +9,7 @@ base = 'http://digital.lib.uiowa.edu'
 port = ':81'
 
 
-def cdm(alias, id, pageinfo='off'):
+def item(alias, id, pageinfo='off'):
     """Factory for creating Item subclass instances."""
     call = Api()
     info = call.iteminfo(alias, id)
@@ -340,9 +340,8 @@ class Api:
 
 if __name__ == "__main__":
     # a single page item
-    single = cdm('calvin', '67')
+    single = item('calvin', '67')
     # a document
-    document = cdm('leighhunt', '1566')
+    document = item('leighhunt', '1566')
     # a monograph
-    monograph = cdm('kinnick', '3077')
-
+    monograph = item('kinnick', '3077')
