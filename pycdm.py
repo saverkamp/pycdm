@@ -75,7 +75,7 @@ class SinglePageItem(Item, Singlepage):
         self.file = info['find']
         self.parentnode = None
         refurlparts = [base, alias, self.id]
-        self.refurl = '/'.join(refURLparts)
+        self.refurl = '/'.join(refurlparts)
         fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
         self.fileurl = '/'.join(fileURLparts)
         self.imageurl = self.getimageurl()
@@ -94,7 +94,7 @@ class Document(Item):
         self.id = id
         self.info = info
         refurlparts = [base, alias, self.id]
-        self.refurl = '/'.join(refURLparts)
+        self.refurl = '/'.join(refurlparts)
         self.structure = []
         for o in objinfo['page']:
             page = Page(o, alias, self.id, self.info['title'], pageinfo)
@@ -113,7 +113,7 @@ class Monograph(Item):
         self.info = info
         self.structure = []
         refurlparts = [base, alias, self.id]
-        self.refurl = '/'.join(refURLparts)
+        self.refurl = '/'.join(refurlparts)
         for key, value in objinfo.items():
             if key == 'node':
                 subitem = Node(collections.OrderedDict(value), alias, self.id, pageinfo)
@@ -180,9 +180,8 @@ class Page(Subitem, Singlepage):
         self.parentnode = parentnode
         self.parent = parent
         refurlparts = [base, alias, self.id]
-        self.refurl = '/'.join(refURLparts)
+        self.refurl = '/'.join(refurlparts)
         call = Api()
-        fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
         self.fileurl = call.getfileurl(self.alias, self.id, self.file)
         self.imageurl = call.getimageurl(self.alias, self.id)
         if (pageinfo == 'on'):
@@ -199,6 +198,42 @@ class Api:
     documentation on API calls."""
     def __init__(self, base=base, port=port):
         self.base = base + port
+
+    def dublincorefieldinfo(self, format='json'):
+        """Calls dmGetDublinCoreFieldInfo and returns json response.
+
+        Full documentation at: http://www.contentdm.org/help6/custom/customize2e.asp"""
+        urlparts = [self.base, 'dmwebservices/index.php?q=dmGetDublinCoreFieldInfo', format]
+        url = '/'.join(urlparts)
+        dcinfo = urllib2.urlopen(url).read()
+        return json.loads(dcinfo)
+
+    def collectionparameters(self, alias, format='json'):
+        """Calls dmGetCollectionParameters and returns json response.
+
+        Full documentation at: http://www.contentdm.org/help6/custom/customize2c.asp"""
+        urlparts = [self.base, 'dmwebservices/index.php?q=dmGetCollectionParameters', alias, format]
+        url = '/'.join(urlparts)
+        collparaminfo = urllib2.urlopen(url).read()
+        return json.loads(collparaminfo)
+
+    def collectionfieldinfo(self, alias, format='json'):
+        """Calls dmGetCollectionFields and returns json response.
+
+        Full documentation at: http://www.contentdm.org/help6/custom/customize2d.asp"""
+        urlparts = [self.base, 'dmwebservices/index.php?q=dmGetCollectionFieldInfo', alias, format]
+        url = '/'.join(urlparts)
+        fieldinfo = urllib2.urlopen(url).read()
+        return json.loads(fieldinfo)
+
+    def fieldvocab(self, alias, field, format='json'):
+        """Calls dmGetCollectionFieldVocabulary and returns json response.
+
+        Full documentation at: http://www.contentdm.org/help6/custom/customize2q.asp"""
+        urlparts = [self.base, 'dmwebservices/index.php?q=dmGetCollectionFieldVocabulary', alias, field, format]
+        url = '/'.join(urlparts)
+        fieldvocab = urllib2.urlopen(url).read()
+        return json.loads(fieldvocab)
 
     def iteminfo(self, alias, id, format='json'):
         """Calls dmGetItemInfo and returns json response.
