@@ -47,7 +47,7 @@ class Collection:
         self.dcmap = {}
         # map field nicknames to dc nicknames, None if no map
         for key, value in self.fields.items():
-            if value.dc == 'BLANK':
+            if value.dc == '':
                 self.dcmap[key] = None
             else:
                 self.dcmap[key] = value.dc
@@ -111,7 +111,9 @@ class SinglePageItem(Item, Singlepage):
             self.collection = collections[alias]
         else:
             collections[alias] = Collection(alias)
+            self.collection = collections[alias]
         self.info = info
+        self.dcinfo = dcinfo(alias, self.info)
         self.label = info['title']
         self.file = info['find']
         self.parentnode = None
@@ -134,6 +136,7 @@ class Document(Item):
         self.alias = alias
         self.id = id
         self.info = info
+        self.dcinfo = dcinfo(alias, self.info)
         if alias in collections:
             self.collection = collections[alias]
         else:
@@ -160,6 +163,7 @@ class Monograph(Item):
         else:
             collections[alias] = Collection(alias)
         self.info = info
+        self.dcinfo = dcinfo(alias, self.info)
         self.structure = []
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
@@ -238,7 +242,17 @@ class Page(Subitem, Singlepage):
     def pageinfo(self):
         call = Api()
         self.info = call.iteminfo(self.alias, self.id)
+        self.dcinfo = dcinfo(self.alias, self.info)
 
+def dcinfo(alias, info):
+    """Function for generating Dublin Core metadata."""
+    dc = {}
+    for key, value in info.items():
+        if key in collections[alias].dcmap.keys():
+            dcfield = collections[alias].dcmap[key]
+            if not dcfield is None:
+                dc[dcfield] = value
+    return dc
 
 class Api:
     """Class for interacting with the CDM Api.
