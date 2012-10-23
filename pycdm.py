@@ -3,6 +3,7 @@
 import urllib2
 import json
 import collections as colls
+from HTMLParser import HTMLParser
 
 base = 'http://digital.lib.uiowa.edu'
 port = ':81'
@@ -45,10 +46,10 @@ class Collection:
             field = Field(alias, f)
             self.fields[field.nick] = field
         self.dcmap = {}
-        # map field nicknames to dc nicknames, None if no map
+        # map field nicknames to dc nicknames, '' if no map
         for key, value in self.fields.items():
             if value.dc == '':
-                self.dcmap[key] = None
+                self.dcmap[key] = ''
             else:
                 self.dcmap[key] = value.dc
 
@@ -112,9 +113,9 @@ class SinglePageItem(Item, Singlepage):
         else:
             collections[alias] = Collection(alias)
             self.collection = collections[alias]
-        self.info = info
+        self.info = htmlunescape(info)
         self.dcinfo = dcinfo(alias, self.info)
-        self.label = info['title']
+        self.label = HTMLParser().unescape(info['title'])
         self.file = info['find']
         self.parentnode = None
         refurlparts = [base, alias, self.id]
@@ -135,7 +136,7 @@ class Document(Item):
     def __init__(self, alias, id, info, objinfo, pageinfo):
         self.alias = alias
         self.id = id
-        self.info = info
+        self.info = htmlunescape(info)
         self.dcinfo = dcinfo(alias, self.info)
         if alias in collections:
             self.collection = collections[alias]
@@ -162,7 +163,7 @@ class Monograph(Item):
             self.collection = collections[alias]
         else:
             collections[alias] = Collection(alias)
-        self.info = info
+        self.info = htmlunescape(info)
         self.dcinfo = dcinfo(alias, self.info)
         self.structure = []
         refurlparts = [base, alias, self.id]
@@ -192,7 +193,7 @@ class Node(Subitem):
     def __init__(self, nodeinfo, alias, parent, pageinfo):
         self.alias = alias
         self.structure = []
-        self.nodetitle = nodeinfo['nodetitle']
+        self.nodetitle = HTMLParser().unescape(nodeinfo['nodetitle'])
         for key, value in nodeinfo.items():
             if (key == 'page'):
                 if type(value) == list:
@@ -228,7 +229,7 @@ class Page(Subitem, Singlepage):
     def __init__(self, objinfo, alias, parent, parentnode, base=base, pageinfo='off'):
         self.alias = alias
         self.id = objinfo['pageptr']
-        self.label = objinfo['pagetitle']
+        self.label = HTMLParser().unescape(objinfo['pagetitle'])
         self.file = objinfo['pagefile']
         self.parentnode = parentnode
         self.parent = parent
@@ -241,7 +242,7 @@ class Page(Subitem, Singlepage):
             self.pageinfo()
     def pageinfo(self):
         call = Api()
-        self.info = call.iteminfo(self.alias, self.id)
+        self.info = htmlunescape(call.iteminfo(self.alias, self.id))
         self.dcinfo = dcinfo(self.alias, self.info)
 
 def dcinfo(alias, info):
@@ -250,9 +251,14 @@ def dcinfo(alias, info):
     for key, value in info.items():
         if key in collections[alias].dcmap.keys():
             dcfield = collections[alias].dcmap[key]
-            if not dcfield is None:
+            if (dcfield != ''):
                 dc[dcfield] = value
     return dc
+
+def htmlunescape(obj):
+    for key, value in obj.iteritems():
+        obj[key] = HTMLParser().unescape(value)
+    return obj
 
 class Api:
     """Class for interacting with the CDM Api.
@@ -305,7 +311,7 @@ class Api:
         urlparts = [self.base, 'dmwebservices/index.php?q=dmGetItemInfo', alias, id, format]
         url = '/'.join(urlparts)
         iteminfo = urllib2.urlopen(url).read()
-        return json.loads(iteminfo)
+        return json.loads(iteminfo, object_hook=empty_to_str)
 
     def objectinfo(self, alias, id, format='json'):
         """Calls dmGetCompoundObjectInfo and returns json response.
@@ -338,7 +344,7 @@ class Api:
         start, suppress, docptr, suggest, facets, format]
         url = '/'.join(urlparts)
         query = urllib2.urlopen(url).read()
-        response = json.loads(query)
+        response = json.loads(query, object_hook=empty_to_str)
         if ret == 'response':
             return response
         else:
@@ -365,6 +371,11 @@ class Api:
             width + '&DMHEIGHT=' + height + '&DMX=' + x + '&DMY=' + y + '&DMTEXT=' + text + '&DMROTATE=' + degrees)
         return url
 
+def empty_to_str(obj):
+    if len(obj) < 1:
+        return ''
+    else:
+        return obj
 
 if __name__ == "__main__":
     # a single page item
