@@ -265,9 +265,15 @@ def dcinfo(alias, info):
     return dc
 
 def htmlunescape(obj):
-    for key, value in obj.iteritems():
-        obj[key] = HTMLParser().unescape(value)
-    return obj
+    if isinstance(obj, dict):
+        for key, value in obj.iteritems():
+            obj[key] = HTMLParser().unescape(value)
+        return obj
+    if isinstance(obj, list):
+        newlist = []
+        for o in obj:
+            newlist.append(HTMLParser().unescape(o))
+        return newlist
 
 class Api:
     """Class for interacting with the CDM Api.
