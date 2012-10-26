@@ -117,7 +117,7 @@ class SinglePageItem(Item, Singlepage):
         self.dcinfo = dcinfo(alias, self.info)
         self.label = HTMLParser().unescape(info['title'])
         self.file = info['find']
-        self.parentnode = None
+        self.parentnodetitle = None
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
         fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
@@ -172,7 +172,7 @@ class Monograph(Item):
         self.structure = []
         for key, value in objinfo.items():
             if key == 'node':
-                subitem = Node(colls.OrderedDict(value), alias, self.id, pageinfo)
+                subitem = Node(colls.OrderedDict(value), alias, self.id, pageinfo, self.info['title'])
                 self.structure.append(subitem)
             elif key == 'page':
                 subitem = Page(value, alias, self.id, pageinfo)
@@ -193,10 +193,12 @@ class Monograph(Item):
 
 class Node(Subitem):
     """Subitem subclass for aggregations of other Nodes and/or Pages."""
-    def __init__(self, nodeinfo, alias, parentId, pageinfo):
+    def __init__(self, nodeinfo, alias, parentId, pageinfo, parenttitle):
         self.alias = alias
         self.structure = []
+        self.parentId = parentId
         self.nodetitle = HTMLParser().unescape(nodeinfo['nodetitle'])
+        self.parentnodetitle = parenttitle
         for key, value in nodeinfo.items():
             if (key == 'page'):
                 if type(value) == list:
@@ -209,10 +211,10 @@ class Node(Subitem):
             elif (key == 'node'):
                 if type(value) == list:
                     for item in value:
-                        subitem = Node(item, alias, parentId, pageinfo)
+                        subitem = Node(item, alias, parentId, pageinfo, self.nodetitle)
                         self.structure.append(subitem)
                 else:
-                    subitem = Node(value, alias, parentId, pageinfo)
+                    subitem = Node(value, alias, parentId, pageinfo, self.nodetitle)
                     self.structure.append(subitem)
 
     def pages(self):
@@ -229,12 +231,12 @@ class Node(Subitem):
 
 class Page(Subitem, Singlepage):
     """Subitem, Singlepage subclass for consitutent Pages of compound objects."""
-    def __init__(self, objinfo, alias, parentId, parentnode, pageinfo='off'):
+    def __init__(self, objinfo, alias, parentId, parentnodetitle, pageinfo='off'):
         self.alias = alias
         self.id = objinfo['pageptr']
         self.label = HTMLParser().unescape(objinfo['pagetitle'])
         self.file = objinfo['pagefile']
-        self.parentnode = parentnode
+        self.parentnodetitle = parentnodetitle
         self.parentId = parentId
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
