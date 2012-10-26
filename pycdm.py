@@ -124,6 +124,7 @@ class SinglePageItem(Item, Singlepage):
         self.fileurl = '/'.join(fileURLparts)
         self.imageurl = self.getimageurl()
     def pages(self):
+        """Return a list of page objects."""
         pages = []
         pages.append(self)
         return pages
@@ -149,6 +150,7 @@ class Document(Item):
             page = Page(o, alias, self.id, self.info['title'], pageinfo)
             self.structure.append(page)
     def pages(self):
+        """Return a list of constituent page objects."""
         return self.structure
 
 
@@ -165,9 +167,9 @@ class Monograph(Item):
             collections[alias] = Collection(alias)
         self.info = htmlunescape(info)
         self.dcinfo = dcinfo(alias, self.info)
-        self.structure = []
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
+        self.structure = []
         for key, value in objinfo.items():
             if key == 'node':
                 subitem = Node(colls.OrderedDict(value), alias, self.id, pageinfo)
@@ -176,6 +178,7 @@ class Monograph(Item):
                 subitem = Page(value, alias, self.id, pageinfo)
                 self.structure.append(subitem)
     def pages(self):
+        """Return a list of constituent page objects."""
         pages = []
         for s in self.structure:
             if isinstance(s, Page):
@@ -190,7 +193,7 @@ class Monograph(Item):
 
 class Node(Subitem):
     """Subitem subclass for aggregations of other Nodes and/or Pages."""
-    def __init__(self, nodeinfo, alias, parent, pageinfo):
+    def __init__(self, nodeinfo, alias, parentId, pageinfo):
         self.alias = alias
         self.structure = []
         self.nodetitle = HTMLParser().unescape(nodeinfo['nodetitle'])
@@ -198,18 +201,18 @@ class Node(Subitem):
             if (key == 'page'):
                 if type(value) == list:
                     for item in value:
-                        subitem = Page(item, alias, parent, self.nodetitle, pageinfo)
+                        subitem = Page(item, alias, parentId, self.nodetitle, pageinfo)
                         self.structure.append(subitem)
                 else:
-                    subitem = Page(value, alias, parent, self.nodetitle, pageinfo)
+                    subitem = Page(value, alias, parentId, self.nodetitle, pageinfo)
                     self.structure.append(subitem)
             elif (key == 'node'):
                 if type(value) == list:
                     for item in value:
-                        subitem = Node(item, alias, parent, pageinfo)
+                        subitem = Node(item, alias, parentId, pageinfo)
                         self.structure.append(subitem)
                 else:
-                    subitem = Node(value, alias, parent, pageinfo)
+                    subitem = Node(value, alias, parentId, pageinfo)
                     self.structure.append(subitem)
 
     def pages(self):
@@ -226,13 +229,13 @@ class Node(Subitem):
 
 class Page(Subitem, Singlepage):
     """Subitem, Singlepage subclass for consitutent Pages of compound objects."""
-    def __init__(self, objinfo, alias, parent, parentnode, base=base, pageinfo='off'):
+    def __init__(self, objinfo, alias, parentId, parentnode, pageinfo='off'):
         self.alias = alias
         self.id = objinfo['pageptr']
         self.label = HTMLParser().unescape(objinfo['pagetitle'])
         self.file = objinfo['pagefile']
         self.parentnode = parentnode
-        self.parent = parent
+        self.parentId = parentId
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
         call = Api()
@@ -383,4 +386,4 @@ if __name__ == "__main__":
     # a document
     document = item('leighhunt', '1566')
     # a monograph
-    monograph = item('kinnick', '3077')
+    monograph = item('cwd', '20001')
