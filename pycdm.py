@@ -62,9 +62,18 @@ class Field:
         self.nick = fieldinfo['nick']
         self.dc = fieldinfo['dc']
         self.req = fieldinfo['req']
-        self.vocab = fieldinfo['vocab']
         self.hide = fieldinfo['hide']
         self.search = fieldinfo['search']
+        self.vocab = fieldinfo['vocab']
+        if self.vocab == 1:
+            call = Api()
+            terms = call.fieldvocab(alias, self.nick)
+            if len(terms) >= 1:
+                self.vocabterms = htmlunescape(terms)
+            else:
+                self.vocabterms = None
+        else:
+            self.vocabterms = None
 
 
 class Item:
@@ -117,7 +126,7 @@ class SinglePageItem(Item, Singlepage):
         self.dcinfo = dcinfo(alias, self.info)
         self.label = HTMLParser().unescape(info['title'])
         self.file = info['find']
-        self.parentnodetitle = None
+        self.parentnodetitle = ''
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
         fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
@@ -316,8 +325,11 @@ class Api:
         Full documentation at: http://www.contentdm.org/help6/custom/customize2q.asp"""
         urlparts = [self.base, 'dmwebservices/index.php?q=dmGetCollectionFieldVocabulary', alias, field, format]
         url = '/'.join(urlparts)
-        fieldvocab = urllib2.urlopen(url).read()
-        return json.loads(fieldvocab)
+        try:
+            fieldvocab = urllib2.urlopen(url).read()
+            return json.loads(fieldvocab)
+        except ValueError:
+            return []
 
     def iteminfo(self, alias, id, format='json'):
         """Calls dmGetItemInfo and returns json response.
