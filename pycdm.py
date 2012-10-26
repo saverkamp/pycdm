@@ -75,8 +75,8 @@ class Item:
     def pages(self):
         pass
     def pageinfo(self):
-        """Call Page.pageinfo on all pages in an Item."""
-        for p in self.pages():
+        """Get page metadata (dmGetItemInfo) for all pages in an Item."""
+        for p in self.pages:
             p.pageinfo()
 
 
@@ -123,7 +123,8 @@ class SinglePageItem(Item, Singlepage):
         fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
         self.fileurl = '/'.join(fileURLparts)
         self.imageurl = self.getimageurl()
-    def pages(self):
+        self.pages = self.getPages()
+    def getPages(self):
         """Return a list of page objects."""
         pages = []
         pages.append(self)
@@ -149,7 +150,8 @@ class Document(Item):
         for o in objinfo['page']:
             page = Page(o, alias, self.id, self.info['title'], pageinfo)
             self.structure.append(page)
-    def pages(self):
+        self.pages = self.getPages()
+    def getPages(self):
         """Return a list of constituent page objects."""
         return self.structure
 
@@ -177,14 +179,15 @@ class Monograph(Item):
             elif key == 'page':
                 subitem = Page(value, alias, self.id, pageinfo)
                 self.structure.append(subitem)
-    def pages(self):
+        self.pages = self.getPages()
+    def getPages(self):
         """Return a list of constituent page objects."""
         pages = []
         for s in self.structure:
             if isinstance(s, Page):
                 pages.append(s)
             elif isinstance(s, Node):
-                nodepages = s.pages()
+                nodepages = s.getPages()
                 pages.extend(nodepages)
             else:
                 print 'none'
@@ -216,15 +219,16 @@ class Node(Subitem):
                 else:
                     subitem = Node(value, alias, parentId, pageinfo, self.nodetitle)
                     self.structure.append(subitem)
+        self.pages = self.getPages()
 
-    def pages(self):
+    def getPages(self):
         """Returns a list of Page objects composing the Node."""
         pages = []
         for s in self.structure:
             if isinstance(s, Page):
                 pages.append(s)
             elif isinstance(s, Node):
-                nodepages = s.pages()
+                nodepages = s.getPages()
                 pages.extend(nodepages)
         return pages
 
