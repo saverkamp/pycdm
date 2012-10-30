@@ -13,9 +13,9 @@ collections = {}
 def item(alias, id, pageinfo='off'):
     """Factory for creating Item subclass instances."""
     call = Api()
-    info = call.iteminfo(alias, id)
-    objinfo = call.objectinfo(alias, id)
-    parent = call.parent(alias, id)
+    info = call.dmGetItemInfo(alias, id)
+    objinfo = call.dmGetCompoundObjectInfo(alias, id)
+    parent = call.dmGetParent(alias, id)
     if alias not in collections:
         collections[alias] = Collection(alias)
     if ('code' in objinfo):
@@ -36,8 +36,8 @@ class Collection:
     """A CONTENTdm collection"""
     def __init__(self, alias):
         call = Api()
-        params = call.collectionparameters(alias)
-        fields = call.collectionfieldinfo(alias)
+        params = call.dmGetCollectionParameters(alias)
+        fields = call.dmGetCollectionFields(alias)
         self.name = params['name']
         self.alias = alias
         # fields are structured as a dictionary of objects with nickname as key (nick:Field)
@@ -67,7 +67,7 @@ class Field:
         self.vocab = fieldinfo['vocab']
         if self.vocab == 1:
             call = Api()
-            terms = call.fieldvocab(alias, self.nick)
+            terms = call.dmGetCollectionFieldVocabulary(alias, self.nick)
             if len(terms) >= 1:
                 self.vocabterms = htmlunescape(terms)
             else:
@@ -94,7 +94,7 @@ class Singlepage:
     def __init__(self):
         pass
     
-    def getimageurl(self, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text', degrees='degrees'):
+    def GetImage(self, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text', degrees='degrees'):
         url = (base + '/utils/ajaxhelper/?CISOROOT=' + self.alias + '&CISOPTR=' + self.id + '&action=' + action + '&DMSCALE=' +
         scale + '&DMWIDTH=' + width + '&DMHEIGHT=' + height + '&DMX=' + x + '&DMY=' + y + '&DMTEXT=' + text + '&DMROTATE=' + degrees)
         self.imageurl = url
@@ -102,7 +102,7 @@ class Singlepage:
 
     def defaultimageurl(self):
         call = Api()
-        self.imageurl = call.getimageurl(self.alias, self.id)
+        self.imageurl = call.GetImage(self.alias, self.id)
 
 
 # abstract class Subitem
@@ -131,7 +131,7 @@ class SinglePageItem(Item, Singlepage):
         self.refurl = '/'.join(refurlparts)
         fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
         self.fileurl = '/'.join(fileURLparts)
-        self.imageurl = self.getimageurl()
+        self.imageurl = self.GetImage()
         self.pages = self.getPages()
     def getPages(self):
         """Return a list of page objects."""
@@ -254,13 +254,13 @@ class Page(Subitem, Singlepage):
         refurlparts = [base, alias, self.id]
         self.refurl = '/'.join(refurlparts)
         call = Api()
-        self.fileurl = call.getfileurl(self.alias, self.id, self.file)
-        self.imageurl = call.getimageurl(self.alias, self.id)
+        self.fileurl = call.GetFile(self.alias, self.id, self.file)
+        self.imageurl = call.GetImage(self.alias, self.id)
         if (pageinfo == 'on'):
             self.pageinfo()
     def pageinfo(self):
         call = Api()
-        self.info = htmlunescape(call.iteminfo(self.alias, self.id))
+        self.info = htmlunescape(call.dmGetItemInfo(self.alias, self.id))
         self.dcinfo = dcinfo(self.alias, self.info)
 
 def dcinfo(alias, info):
@@ -292,7 +292,7 @@ class Api:
     def __init__(self, base=base, port=port):
         self.base = base + port
 
-    def dublincorefieldinfo(self, format='json'):
+    def dmGetDublinCoreFieldInfo(self, format='json'):
         """Calls dmGetDublinCoreFieldInfo and returns json response.
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2e.asp"""
@@ -301,7 +301,7 @@ class Api:
         dcinfo = urllib2.urlopen(url).read()
         return json.loads(dcinfo)
 
-    def collectionparameters(self, alias, format='json'):
+    def dmGetCollectionParameters(self, alias, format='json'):
         """Calls dmGetCollectionParameters and returns json response.
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2c.asp"""
@@ -310,7 +310,7 @@ class Api:
         collparaminfo = urllib2.urlopen(url).read()
         return json.loads(collparaminfo)
 
-    def collectionfieldinfo(self, alias, format='json'):
+    def dmGetCollectionFields(self, alias, format='json'):
         """Calls dmGetCollectionFields and returns json response.
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2d.asp"""
@@ -319,7 +319,7 @@ class Api:
         fieldinfo = urllib2.urlopen(url).read()
         return json.loads(fieldinfo)
 
-    def fieldvocab(self, alias, field, format='json'):
+    def dmGetCollectionFieldVocabulary(self, alias, field, format='json'):
         """Calls dmGetCollectionFieldVocabulary and returns json response.
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2q.asp"""
@@ -331,7 +331,7 @@ class Api:
         except ValueError:
             return []
 
-    def iteminfo(self, alias, id, format='json'):
+    def dmGetItemInfo(self, alias, id, format='json'):
         """Calls dmGetItemInfo and returns json response.
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2f.asp"""
@@ -340,7 +340,7 @@ class Api:
         iteminfo = urllib2.urlopen(url).read()
         return json.loads(iteminfo, object_hook=empty_to_str)
 
-    def objectinfo(self, alias, id, format='json'):
+    def dmGetCompoundObjectInfo(self, alias, id, format='json'):
         """Calls dmGetCompoundObjectInfo and returns json response.
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2g.asp"""
@@ -349,7 +349,7 @@ class Api:
         compoundinfo = urllib2.urlopen(url).read()
         return json.loads(compoundinfo, object_pairs_hook=colls.OrderedDict)
 
-    def parent(self, alias, id, format='json'):
+    def dmGetParent(self, alias, id, format='json'):
         """Calls GetParent and returns CDM item id of parent or '-1' if no parent.
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2i.asp"""
@@ -358,7 +358,7 @@ class Api:
         parent = urllib2.urlopen(url).read()
         return json.loads(parent)['parent']
     
-    def query(self, string, alias='all', field='CISOSEARCHALL', mode='exact', operator='and', maxrecs='1024',
+    def dmQuery(self, string, alias='all', field='CISOSEARCHALL', mode='exact', operator='and', maxrecs='1024',
         fields='title', sortby='nosort', start='1', suppress='1', docptr='0', suggest='0', facets='0',
         format='json', ret='items'):
         """Calls dmQuery and returns a list of CDM item ids returned by the query.
@@ -380,7 +380,7 @@ class Api:
                 items.append(r['pointer'])
             return items
     
-    def getfileurl(self, alias, id, filename):
+    def GetFile(self, alias, id, filename):
         """Calls GetFile and returns a URL for retrieving the file.""
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2ai.asp"""
@@ -389,7 +389,7 @@ class Api:
         url = '/'.join(urlparts)
         return url
     
-    def getimageurl(self, alias, id, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text',
+    def GetImage(self, alias, id, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text',
      degrees='degrees'):
         """Calls GetImage and returns a URL for downloading a JPEG of the file.
 
