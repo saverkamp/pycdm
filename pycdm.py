@@ -132,6 +132,8 @@ class SinglePageItem(Item, Singlepage):
         fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
         self.fileurl = '/'.join(fileURLparts)
         self.imageurl = self.GetImage()
+        thumburlparts = [base, 'utils/getthumbnail/collection', self.alias, 'id', self.id]
+        self.thumburl = '/'.join(thumburlparts)
         self.pages = self.getPages()
     def getPages(self):
         """Return a list of page objects."""
@@ -256,6 +258,8 @@ class Page(Subitem, Singlepage):
         call = Api()
         self.fileurl = call.GetFile(self.alias, self.id, self.file)
         self.imageurl = call.GetImage(self.alias, self.id)
+        thumburlparts = [base, 'utils/getthumbnail/collection', self.alias, 'id', self.id]
+        self.thumburl = '/'.join(thumburlparts)
         if (pageinfo == 'on'):
             self.pageinfo()
     def pageinfo(self):
@@ -381,7 +385,7 @@ class Api:
             return items
     
     def GetFile(self, alias, id, filename):
-        """Calls GetFile and returns a URL for retrieving the file.""
+        """Calls GetFile and returns a URL for retrieving the file.
 
         Full documentation at: http://www.contentdm.org/help6/custom/customize2ai.asp"""
         self.base = base
@@ -396,6 +400,14 @@ class Api:
         Full documentation at: http://www.contentdm.org/help6/custom/customize2aj.asp"""
         url = (base + '/utils/ajaxhelper/?CISOROOT=' + alias + '&CISOPTR=' + id + '&action=' + action + '&DMSCALE=' + scale + '&DMWIDTH=' +
             width + '&DMHEIGHT=' + height + '&DMX=' + x + '&DMY=' + y + '&DMTEXT=' + text + '&DMROTATE=' + degrees)
+        return url
+
+    def GetThumbnail(self, alias, id):
+        """Calls GetThunbnail and returns a URL for retrieving the thumbnail.
+
+        Full documentation at: http://www.contentdm.org/help6/custom/customize2ak.asp"""
+        thumburlparts = [base, 'utils/getthumbnail/collection', alias, 'id', id]
+        url = '/'.join(thumburlparts)
         return url
 
 def empty_to_str(obj):
