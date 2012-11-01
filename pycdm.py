@@ -24,7 +24,7 @@ def item(alias, id, pageinfo='off'):
         else:
             return SinglePageItem(alias, id, info, pageinfo)
     elif ('type' in objinfo):
-        if (objinfo['type'] == 'Document'):
+        if (objinfo['type'] == 'Document' or objinfo['type'] == 'Document-PDF'):
             return Document(alias, id, info, objinfo, pageinfo)
         elif (objinfo['type'] == 'Monograph'):
             return Monograph(alias, id, info, objinfo, pageinfo)
