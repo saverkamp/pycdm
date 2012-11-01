@@ -1,4 +1,7 @@
-#File pycdm.py
+"""
+Pycdm - Library for working with CONTENTdm item and collection metadata.
+
+"""
 
 import urllib2
 import json
@@ -95,6 +98,7 @@ class Singlepage:
         pass
     
     def getfileurl(self, alias, find):
+        """Calls dmGetItemUrl to get resource url for .url files"""
         call = Api()
         if (find[-3:] == 'url'):
             url = call.dmGetItemUrl(alias, find)
@@ -103,12 +107,14 @@ class Singlepage:
             return call.GetFile(alias, self.id, find)
 
     def GetImage(self, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text', degrees='degrees'):
+        """Builds url for retrieving downloadable version of image."""
         url = (base + '/utils/ajaxhelper/?CISOROOT=' + self.alias + '&CISOPTR=' + self.id + '&action=' + action + '&DMSCALE=' +
         scale + '&DMWIDTH=' + width + '&DMHEIGHT=' + height + '&DMX=' + x + '&DMY=' + y + '&DMTEXT=' + text + '&DMROTATE=' + degrees)
         self.imageurl = url
         return url
 
     def defaultimageurl(self):
+        """Builds GetImage url using defaults"""
         call = Api()
         self.imageurl = call.GetImage(self.alias, self.id)
 
@@ -262,14 +268,16 @@ class Page(Subitem, Singlepage):
         self.parentnodetitle = parentnodetitle
         self.parentId = parentId
         refurlparts = [base, alias, self.id]
-        self.refurl = '/'.join(refurlparts) 
-        call = Api()    
+        self.refurl = '/'.join(refurlparts)
+        call = Api()
         self.imageurl = call.GetImage(self.alias, self.id)
         thumburlparts = [base, 'utils/getthumbnail/collection', self.alias, 'id', self.id]
         self.thumburl = '/'.join(thumburlparts)
         if (pageinfo == 'on'):
             self.pageinfo()
+
     def pageinfo(self):
+        """Calls dmGetItemInfo on pages to retrive page-level metadata."""
         call = Api()
         self.info = htmlunescape(call.dmGetItemInfo(self.alias, self.id))
         self.dcinfo = dcinfo(self.alias, self.info)
@@ -285,6 +293,7 @@ def dcinfo(alias, info):
     return dc
 
 def htmlunescape(obj):
+    """Unescapes html entities in lists and dict values."""
     if isinstance(obj, dict):
         for key, value in obj.iteritems():
             obj[key] = HTMLParser().unescape(value)
@@ -433,6 +442,7 @@ class Api:
         return url
 
 def empty_to_str(obj):
+    """Converts empty dicts to empty strings."""
     if len(obj) < 1:
         return ''
     else:
