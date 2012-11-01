@@ -94,6 +94,14 @@ class Singlepage:
     def __init__(self):
         pass
     
+    def getfileurl(self, alias, find):
+        call = Api()
+        if (find[-3:] == 'url'):
+            url = call.dmGetItemUrl(alias, find)
+            return url.replace('\r\n', '')
+        else:
+            return call.GetFile(alias, self.id, find)
+
     def GetImage(self, action='2', scale='scale', width='width', height='height', x='x', y='y', text='text', degrees='degrees'):
         url = (base + '/utils/ajaxhelper/?CISOROOT=' + self.alias + '&CISOPTR=' + self.id + '&action=' + action + '&DMSCALE=' +
         scale + '&DMWIDTH=' + width + '&DMHEIGHT=' + height + '&DMX=' + x + '&DMY=' + y + '&DMTEXT=' + text + '&DMROTATE=' + degrees)
@@ -127,10 +135,9 @@ class SinglePageItem(Item, Singlepage):
         self.label = HTMLParser().unescape(info['title'])
         self.file = info['find']
         self.parentnodetitle = ''
-        refurlparts = [base, alias, self.id]
+        refurlparts = [base, 'cdm', 'ref', 'collection', alias, 'id', self.id]
         self.refurl = '/'.join(refurlparts)
-        fileURLparts = [base, 'utils/getfile/collection', self.alias, 'id', self.id, 'filename', self.file]
-        self.fileurl = '/'.join(fileURLparts)
+        self.fileurl = self.getfileurl(alias, info['find'])
         self.imageurl = self.GetImage()
         thumburlparts = [base, 'utils/getthumbnail/collection', self.alias, 'id', self.id]
         self.thumburl = '/'.join(thumburlparts)
@@ -155,7 +162,7 @@ class Document(Item):
             self.collection = collections[alias]
         else:
             collections[alias] = Collection(alias)
-        refurlparts = [base, alias, self.id]
+        refurlparts = [base, 'cdm', 'ref', 'collection', alias, 'id', self.id]
         self.refurl = '/'.join(refurlparts)
         self.structure = []
         for o in objinfo['page']:
@@ -180,7 +187,7 @@ class Monograph(Item):
             collections[alias] = Collection(alias)
         self.info = htmlunescape(info)
         self.dcinfo = dcinfo(alias, self.info)
-        refurlparts = [base, alias, self.id]
+        refurlparts = [base, 'cdm', 'ref', 'collection', alias, 'id', self.id]
         self.refurl = '/'.join(refurlparts)
         self.structure = []
         for key, value in objinfo.items():
@@ -251,12 +258,12 @@ class Page(Subitem, Singlepage):
         self.id = objinfo['pageptr']
         self.label = HTMLParser().unescape(objinfo['pagetitle'])
         self.file = objinfo['pagefile']
+        self.fileurl = self.getfileurl(alias, objinfo['pagefile'])
         self.parentnodetitle = parentnodetitle
         self.parentId = parentId
         refurlparts = [base, alias, self.id]
-        self.refurl = '/'.join(refurlparts)
-        call = Api()
-        self.fileurl = call.GetFile(self.alias, self.id, self.file)
+        self.refurl = '/'.join(refurlparts) 
+        call = Api()    
         self.imageurl = call.GetImage(self.alias, self.id)
         thumburlparts = [base, 'utils/getthumbnail/collection', self.alias, 'id', self.id]
         self.thumburl = '/'.join(thumburlparts)
@@ -381,8 +388,23 @@ class Api:
         else:
             items = []
             for r in response['records']:
-                items.append(r['pointer'])
+                alias = r['collection'].replace('/', '')
+                id = str(r['pointer'])
+                items.append((alias, id))
             return items
+
+    def dmGetItemUrl(self, alias, find, format='json'):
+        """Calls dmGetItemURL for a .url item and returns a URL for retrieving the resource.
+
+        Full documentation at: http://www.contentdm.org/help6/custom/customize2ae.asp"""
+        if (find[-3:] == 'url'):
+            urlparts = [self.base, 'dmwebservices', 'index.php?q=dmGetItemUrl', alias, find, format]
+            url = '/'.join(urlparts)
+            print url
+            query = urllib2.urlopen(url).read()
+            response = json.loads(query)
+            return response['URL']
+
     
     def GetFile(self, alias, id, filename):
         """Calls GetFile and returns a URL for retrieving the file.
