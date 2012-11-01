@@ -14,9 +14,13 @@ Pycdm interfaces with the CONTENTdm 6 dmwebservices API to fetch metadata. You c
 
 Pycdm works with Python 2.7x only (solely to make use of the collections.OrderedDict subclass, which preserves Node and Page object sequence within dictionaries).
 
-Install with pip (or easy_install):
+Install with pip: 
 
-    $ pip pycdm
+    $ pip install pycdm
+
+(or easy_install):
+
+    $ easy_install pycdm
 
 Open the pycdm.py file and replace the base variable with the base url of your CONTENTdm respository. You'll also want to swap out the arguments in the test code for items of your own.
 
