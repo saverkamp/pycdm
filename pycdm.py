@@ -282,7 +282,7 @@ class Page(Subitem, Singlepage):
         self.fileurl = self.getfileurl(alias, objinfo['pagefile'])
         self.parentnodetitle = parentnodetitle
         self.parentId = parentId
-        refurlparts = [base, alias, self.id]
+        refurlparts = [base, 'cdm', 'ref', 'collection', alias, 'id', self.id]
         self.refurl = '/'.join(refurlparts)
         call = Api()
         self.imageurl = call.GetImage(self.alias, self.id)
