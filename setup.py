@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='Pycdm',
-    version='0.1',
+    version='0.1.2',
     author='Shawn Averkamp',
     author_email='shawnaverkamp@gmail.com',
     url='http://pypi.python.org/pypi/pycdm',

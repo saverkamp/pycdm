@@ -1,0 +1,13 @@
+PYCDM CHANGELOG
+===============
+
+Release 0.1.1 -- 2012-12-12
+-----------------------
+BUG Fixes:
+ - Fixed Page.refurl syntax
+ 
+
+ Release 0.1.2 -- 2013-01-30
+------------------------
+BUG Fixes:
+ - Fixed Document to accommodate one-page document objects 

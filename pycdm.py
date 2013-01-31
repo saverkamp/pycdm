@@ -1,7 +1,7 @@
 """
 Pycdm - Library for working with CONTENTdm item and collection metadata.
 
-Copyright © 2012 Shawn Averkamp  <shawn-averkamp@uiowa.edu>
+Copyright 2012 Shawn Averkamp  <shawn-averkamp@uiowa.edu>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -186,9 +186,16 @@ class Document(Item):
         refurlparts = [base, 'cdm', 'ref', 'collection', alias, 'id', self.id]
         self.refurl = '/'.join(refurlparts)
         self.structure = []
-        for o in objinfo['page']:
-            page = Page(o, alias, self.id, self.info['title'], pageinfo)
-            self.structure.append(page)
+        for key, value in objinfo.items():
+            if key == 'page':
+                if type(value) == list:
+                    for v in value:
+                        page = Page(v, alias, self.id, self.info['title'], pageinfo)
+                        self.structure.append(page)
+                else:
+                    page = Page(value, alias, self.id, self.info['title'], pageinfo)
+                    self.structure.append(page)
+
         self.pages = self.getPages()
     def getPages(self):
         """Return a list of constituent page objects."""
