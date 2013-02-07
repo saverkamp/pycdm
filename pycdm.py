@@ -52,7 +52,15 @@ def item(alias, id, pageinfo='off'):
 
 
 class Collection:
-    """A CONTENTdm collection"""
+    """A CONTENTdm collection
+
+    Attributes:
+        name    The name of the digital collection
+        alias   The CDM alias of the digital collection
+        url     The URL for the digital collection
+        fields  A dict of the collection's Field objects with field nickname as key
+        dcmap   A dict of the collection field mapping to Qualified Dublin Core
+    """
     def __init__(self, alias):
         call = Api()
         params = call.dmGetCollectionParameters(alias)
@@ -76,7 +84,19 @@ class Collection:
 
 
 class Field:
-    """A Collection field"""
+    """A Collection field
+
+    Attributes:
+        alias   The alias of the collection
+        name    The full name of the field
+        nick    The CDM nickname of the field
+        dc      The Dublin Core mapping of the field
+        req     Obligation of the field, required=1
+        hide    Field is hidden, hidden=1
+        search  Field is indexed, search=1
+        vocab   Field has controlled vocabulary, vocab=1
+        vocabterms  List of controlled vocabulary terms
+    """
     def __init__(self, alias, fieldinfo):
         self.alias = alias
         self.name = fieldinfo['name']
@@ -145,7 +165,24 @@ class Subitem:
 
 
 class SinglePageItem(Item, Singlepage):
-    """Item, Singlepage subclass for single page items."""
+    """Item, Singlepage subclass for single page items.
+
+    Attributes:
+        alias       The collection alias
+        id          The CDM generated identifer of the item
+        collection  The Collection object the item is part of 
+        info        Dict of descriptive metadata for the item, where key=field nickname
+        dcinfo      Dict of descriptive metadata for the item, where key=DC field name
+        label       The label for the page
+        file        The filename of the page file
+        parentnodetitle     The title of the parent node (will always be empty for SinglePageItem)
+        refurl      The CDM reference URL for the item
+        fileurl     URL for the stored file for the page
+        imageurl    URL for the default scaled/cropped JPEG image of a page image. Use GetImage() to 
+                    set URL with different parameters 
+        thumburl    URL for the page thumbnail
+        pages       List of the item's consitutent page objects
+    """
     def __init__(self, alias, id, info, pageinfo):
         self.alias = alias
         self.id = id
@@ -177,7 +214,20 @@ class SinglePageItem(Item, Singlepage):
 class Document(Item):
     """Item subclass for CDM document compound objects.
 
-    A Document is composed of a series of Pages."""
+    A Document is composed of a series of Pages.
+
+    Attributes:
+    alias       The collection alias
+    id          The CDM generated identifer of the item
+    collection  The Collection object the item is part of 
+    info        Dict of descriptive metadata for the item, where key=field nickname
+    dcinfo      Dict of descriptive metadata for the item, where key=DC field name
+    label       The label for the page
+    file        The filename of the page file
+    refurl      The CDM reference URL for the item
+    structure   The page structure of the Document object
+    pages       List of the item's consitutent page objects
+    """
     def __init__(self, alias, id, info, objinfo, pageinfo):
         self.alias = alias
         self.id = id
@@ -210,7 +260,20 @@ class Document(Item):
 class Monograph(Item):
     """Item subclass for CDM Monograph compound objects.
 
-    A Monograph is composed of any combination of Nodes and Pages"""
+    A Monograph is composed of any combination of Nodes and Pages
+
+    Attributes:
+    alias       The collection alias
+    id          The CDM generated identifer of the item
+    collection  The Collection object the item is part of 
+    info        Dict of descriptive metadata for the item, where key=field nickname
+    dcinfo      Dict of descriptive metadata for the item, where key=DC field name
+    label       The label for the page
+    file        The filename of the page file
+    refurl      The CDM reference URL for the item
+    structure   The node/page structure of the Monograph object
+    pages       List of the item's consitutent page objects
+    """
     def __init__(self, alias, id, info, objinfo, pageinfo):
         self.alias = alias
         self.id = id
@@ -247,7 +310,16 @@ class Monograph(Item):
 
 
 class Node(Subitem):
-    """Subitem subclass for aggregations of other Nodes and/or Pages."""
+    """Subitem subclass for aggregations of other Nodes and/or Pages.
+
+        Attributes:
+        alias       The collection alias
+        structure   The node/page structure of the node
+        nodetitle   The title of the node
+        parentnodetitle     The title of the parent node
+        parentId    The CDM generated identifier of the parent item
+        pages       List of the node's consitutent page objects
+        """
     def __init__(self, nodeinfo, alias, parentId, pageinfo, parenttitle):
         self.alias = alias
         self.structure = []
@@ -286,7 +358,27 @@ class Node(Subitem):
 
 
 class Page(Subitem, Singlepage):
-    """Subitem, Singlepage subclass for consitutent Pages of compound objects."""
+    """Subitem, Singlepage subclass for consitutent Pages of compound objects.
+
+    Attributes:
+        alias       The collection alias
+        id          The CDM generated identifer of the item
+        info        Dict of descriptive metadata for the item, where key=field nickname (turned off by 
+                    default. Retrive by calling pageinfo() or by setting pageinfo='on' when instantiating
+                    the item)
+        dcinfo      Dict of descriptive metadata for the item, where key=DC field name (turned off by 
+                    default. Retrive by calling pageinfo() or by setting pageinfo='on' when instantiating
+                    the item)
+        label       The label for the page
+        file        The filename of the page file
+        parentnodetitle     The title of the parent node
+        parentId    The CDM generated identifier of the parent item
+        refurl      The CDM reference URL for the page
+        fileurl     URL for the stored file for the page
+        imageurl    URL for the default scaled/cropped JPEG image of a page image. Use GetImage() to 
+                    set URL with different parameters 
+        thumburl    URL for the page thumbnail
+    """
     def __init__(self, objinfo, alias, parentId, parentnodetitle, pageinfo='off'):
         self.alias = alias
         self.id = objinfo['pageptr']
@@ -336,7 +428,11 @@ class Api:
     """Class for interacting with the CDM Api.
 
     See: http://www.contentdm.org/help6/custom/customize2a.asp for full
-    documentation on API calls."""
+    documentation on API calls.
+
+    Attributes:
+        base    The base url plus port for making calls to the CDM API
+    """
     def __init__(self, base=base, port=port):
         self.base = base + port
 
