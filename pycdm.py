@@ -34,6 +34,7 @@ def item(alias, id, pageinfo='off'):
     info = call.dmGetItemInfo(alias, id)
     objinfo = call.dmGetCompoundObjectInfo(alias, id)
     parent = call.dmGetParent(alias, id)
+    #initialize Collection object for alias and store in collections
     if alias not in collections:
         collections[alias] = Collection(alias)
     if ('code' in objinfo):
@@ -58,6 +59,8 @@ class Collection:
         fields = call.dmGetCollectionFields(alias)
         self.name = params['name']
         self.alias = alias
+        urlparts = [base, alias]
+        self.url = '/'.join(urlparts)
         # fields are structured as a dictionary of objects with nickname as key (nick:Field)
         self.fields = {}
         for f in fields:
@@ -146,6 +149,7 @@ class SinglePageItem(Item, Singlepage):
     def __init__(self, alias, id, info, pageinfo):
         self.alias = alias
         self.id = id
+        #If not in collections dict, initialize Collection object for alias and store in collections
         if alias in collections:
             self.collection = collections[alias]
         else:
@@ -179,6 +183,7 @@ class Document(Item):
         self.id = id
         self.info = htmlunescape(info)
         self.dcinfo = dcinfo(alias, self.info)
+        #If not in collections dict, initialize Collection object for alias and store in collections
         if alias in collections:
             self.collection = collections[alias]
         else:
@@ -209,6 +214,7 @@ class Monograph(Item):
     def __init__(self, alias, id, info, objinfo, pageinfo):
         self.alias = alias
         self.id = id
+        #If not in collections dict, initialize Collection object for alias and store in collections
         if alias in collections:
             self.collection = collections[alias]
         else:
