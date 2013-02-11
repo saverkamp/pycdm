@@ -222,8 +222,6 @@ class Document(Item):
     collection  The Collection object the item is part of 
     info        Dict of descriptive metadata for the item, where key=field nickname
     dcinfo      Dict of descriptive metadata for the item, where key=DC field name
-    label       The label for the page
-    file        The filename of the page file
     refurl      The CDM reference URL for the item
     structure   The page structure of the Document object
     pages       List of the item's consitutent page objects
@@ -268,8 +266,6 @@ class Monograph(Item):
     collection  The Collection object the item is part of 
     info        Dict of descriptive metadata for the item, where key=field nickname
     dcinfo      Dict of descriptive metadata for the item, where key=DC field name
-    label       The label for the page
-    file        The filename of the page file
     refurl      The CDM reference URL for the item
     structure   The node/page structure of the Monograph object
     pages       List of the item's consitutent page objects
