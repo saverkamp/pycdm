@@ -510,13 +510,13 @@ class Api:
     
     def dmQuery(self, string, alias='all', field='CISOSEARCHALL', mode='exact', operator='and', maxrecs='1024',
         fields='title', sortby='nosort', start='1', suppress='1', docptr='0', suggest='0', facets='0',
-        format='json', ret='items'):
+        format='json', ret='items', sep="^"):
         """Calls dmQuery and returns a list of CDM item ids returned by the query.
 
         Set ret to 'response' to return json reponse instead.
         Full documentation at: http://www.contentdm.org/help6/custom/customize2h.asp"""
         string = string.replace(' ', '+')
-        searchstrings = field + '^' + string + '^' + mode + '^' + operator
+        searchstrings = field + sep + string + sep + mode + sep + operator
         urlparts = [self.base, 'dmwebservices/index.php?q=dmQuery', alias, searchstrings, fields, sortby, maxrecs,
         start, suppress, docptr, suggest, facets, format]
         url = '/'.join(urlparts)
@@ -570,6 +570,18 @@ class Api:
         thumburlparts = [base, 'utils/getthumbnail/collection', alias, 'id', id]
         url = '/'.join(thumburlparts)
         return url
+
+    def dmGetCollectionList(self, format='json'):
+        """
+         Calls dmGetCollectionList and returns a list of all visible collections.
+         i
+         Full documenation at http://www.contentdm.org/help6/custom/customize2b.asp
+        """
+        urlparts = [self.base , 'dmwebservices', 'index.php?q=dmGetCollectionList',format]
+        url = '/'.join(urlparts)
+        query = urllib2.urlopen(url).read()
+        response = json.loads(query)
+        return response
 
 def empty_to_str(obj):
     """Converts empty dicts to empty strings."""
