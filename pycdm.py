@@ -404,8 +404,18 @@ def dcinfo(alias, info):
     for key, value in info.items():
         if key in collections[alias].dcmap.keys():
             dcfield = collections[alias].dcmap[key]
-            if (dcfield != ''):
-                dc[dcfield] = value
+            if dcfield not in dc.keys():
+                dc[dcfield] = []
+            for v in value.split(';'):
+                if (v != '') and (v != ';'):
+                    dc[dcfield].append(v.strip(';'))
+    for key, value in dc.items():
+        if len(value) > 1:
+            dc[key] = ';'.join(value)
+        elif len(value) == 1:
+            dc[key] = value[0]
+        else:
+            dc[key] = ''
     return dc
 
 def htmlunescape(obj):
