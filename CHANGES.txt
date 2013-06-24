@@ -10,9 +10,16 @@ BUG Fixes:
 Release 0.1.2 -- 2013-01-30
 ------------------------
 BUG Fixes:
- - Fixed Document to accommodate one-page document objects 
+  - Fixed Document to accommodate one-page document objects 
  
 Release 0.1.3 -- 2013-02-07
 ------------------------
   - Added url attribute to Collection object
   - Added class attribute documentation
+
+Release 0.1.4 -- 2013-06-24
+-------------------------
+  - Merged pull request from @bibliotechy to add dmGetCollectionList api call
+
+BUG Fixes:
+  - Fixed Item.dcinfo to store values from multiple mapped fields
