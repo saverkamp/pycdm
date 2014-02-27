@@ -22,13 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
 import json
+import csv
+import cStringIO
+import codecs
 import collections as colls
 from HTMLParser import HTMLParser
 
 base = 'http://digital.lib.uiowa.edu'
 port = ':81'
 collections = {}
-
 
 def item(alias, id, pageinfo='off'):
     """Factory for creating Item subclass instances."""
@@ -598,6 +600,60 @@ class Api:
         query = urllib2.urlopen(url).read()
         response = json.loads(query)
         return response
+
+class UnicodeWriter:
+    """
+    A CSV writer which will write rows to CSV file "f",
+    which is encoded in the given encoding. Supports CSV()
+    """
+
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+        # Redirect output to a queue
+        self.queue = cStringIO.StringIO()
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.stream = f
+        self.encoder = codecs.getincrementalencoder(encoding)()
+
+    def writerow(self, row):
+        self.writer.writerow([unicode(s).encode("utf-8") for s in row])
+        # Fetch UTF-8 output from the queue ...
+        data = self.queue.getvalue()
+        data = data.decode("utf-8")
+        # ... and reencode it into the target encoding
+        data = self.encoder.encode(data)
+        # write to the target stream
+        self.stream.write(data)
+        # empty queue
+        self.queue.truncate(0)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+
+class CSV:
+    """A CSV object to make writing unicode data to CSV easier.
+
+    Attributes:
+    filename    The filename of the CSV file
+    f           The CSV file
+    wtr         A UnicodeWriter for the CSV file
+    header      The header row of the CSV file (optional)
+    """
+    def __init__(self, filename, header=None):
+        self.filename = filename
+        self.f = open(self.filename, 'wb')
+        self.wtr = UnicodeWriter(self.f)
+        if header is not None:
+            self.wtr.writerow(header)
+        self.header = header
+
+    def writerow(self, row):
+        """Writes a row to the CSV file."""
+        self.wtr.writerow(row)
+
+    def close(self):
+        """Closes the CSV file."""
+        self.f.close()
 
 def empty_to_str(obj):
     """Converts empty dicts to empty strings."""
