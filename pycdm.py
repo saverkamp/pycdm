@@ -28,7 +28,7 @@ import codecs
 import collections as colls
 from HTMLParser import HTMLParser
 
-base = 'http://digital.lib.uiowa.edu'
+base = 'http://yourbaseurl.edu'
 port = ':81'
 collections = {}
 
