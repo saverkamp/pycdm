@@ -100,7 +100,7 @@ class Collection:
         if itemscount == 10000:
             startnum = str(itemscount + 1)
             self.getItems(startnum=startnum, items=items)
-        return items
+        self.items = items
 
 class Field:
     """A Collection field
