@@ -23,3 +23,10 @@ Release 0.1.4 -- 2013-06-24
 
 BUG Fixes:
   - Fixed Item.dcinfo to store values from multiple mapped fields
+
+Release 0.2 -- 2014-03-01
+-------------------------
+  - Added getItems() method to Collection object
+  - Added CSV class for easy generation of Unicode friendly CSV files
+  - Updated documentation
+  
