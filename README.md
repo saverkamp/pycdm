@@ -232,7 +232,7 @@ If you haven't ever worked with the API or you don't manage your CONTENTdm serve
 
 # License
 
-Copyright © 2012 Shawn Averkamp  <shawn-averkamp@uiowa.edu>
+Copyright © 2012 Shawn Averkamp  <shawnaverkamp@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
