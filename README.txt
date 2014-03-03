@@ -229,6 +229,9 @@ Don't forget to close your file when you're finished:
 
 ###A word of caution!
 If you haven't ever worked with the API or you don't manage your CONTENTdm server, please have a heart-to-heart with your sysadmin before you begin. Once you start working with many items or collections at once, it's very easy to generate many API calls, possibly enough to help crash your server. Your sysadmin can help you hack responsibly or give you the keys to a test instance.   
+###Catcher
+
+Had I more time to work on this library I would have added more support for [Catcher](http://contentdm.org/help6/addons/catcher.asp), CONTENTdm's web service for batch metadata edits, but for now you can find a [catcher.py class](https://gist.github.com/saverkamp/9197945) and a [sample script](https://gist.github.com/saverkamp/9198310) over in GitHubGist.  
 
 # License
 
